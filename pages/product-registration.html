@@ -289,7 +289,7 @@
                                 <button type="button" class="btn btn-primary rounded-pill px-3" id="uploadCsvBtnDirect">
                                     <i class="bi bi-plus-circle me-1"></i> Add Multiple Products
                                 </button>
-                                <i class="bi bi-question-circle ms-2 text-danger" data-bs-toggle="tooltip" data-bs-placement="top"  title="Upload a CSV file containing 'Product Category' and 'Serial Number' columns."  style="cursor: pointer;"></i>
+                                <i id="csvTooltip" class="bi bi-question-circle ms-2 text-danger" data-bs-toggle="tooltip" data-bs-placement="top"  title="Upload a CSV file containing 'Product Category' and 'Serial Number' columns."  style="cursor: pointer;"></i>
                             </div>
                         </div>
                         <div id="product-entries-container">
@@ -349,16 +349,22 @@
                 </div>
     
                 <div class="col-md-6 mb-3">
-                  <label for="invoice_receipt" class="form-label">Upload Invoice PDF</label>
-                  <input type="file" id="invoice_receipt" name="invoice_receipt"
-                      class="form-control rounded-3 p-3"
-                      accept=".pdf"
-                      required>
-                  <small class="form-text text-muted">
+                    <label for="invoice_receipt" class="form-label">Upload Invoice PDF</label>
+                    <div class="position-relative">
+                      <input type="file" id="invoice_receipt" name="invoice_receipt"
+                             class="form-control rounded-3 p-3"
+                             accept=".pdf"
+                             required>
+                      <!-- Cross mark outside the input field -->
+                      <span id="remove-file-btn" class="position-absolute end-0 p-2" style="top: 0; transform: translateY(calc(-100% - 4px)); z-index: 10; cursor: pointer; color: red; display:none;">
+                        &#10005;
+                      </span>
+                    </div>
+                    <small class="form-text text-muted">
                       📌 Note: Multiple files not accepted. Submit one merged PDF.
-                  </small>
-                  <div class="invalid-feedback">Invoice PDF is required. Please upload a PDF file.</div>
-                </div>
+                    </small>
+                    <div class="invalid-feedback">Invoice PDF is required. Please upload a PDF file.</div>
+                  </div>
     
                 <div class="col-md-6 mb-3 d-flex align-items-end">
                     <div class="g-recaptcha" data-sitekey="6LenD0sqAAAAAEXly6Fsq8KVpB5iT0rQWxIHw7-j"></div>
@@ -380,6 +386,38 @@
     
     <script>
       document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTrigger = document.querySelector('[data-bs-toggle="tooltip"]');
+        const tooltip = new bootstrap.Tooltip(tooltipTrigger, {
+            trigger: 'hover focus click'
+        });
+        const tooltipEl = document.getElementById('csvTooltip');
+
+        // Dispose existing tooltip instance, if any
+        bootstrap.Tooltip.getInstance(tooltipEl)?.dispose();
+
+        new bootstrap.Tooltip(tooltipEl, {
+        trigger: 'hover focus click',
+        placement: 'top',
+        fallbackPlacements: []
+        });
+
+        const fileInput = document.getElementById('invoice_receipt');
+        const removeButton = document.getElementById('remove-file-btn');
+
+        // Show "Remove" button when a file is selected
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+            removeButton.style.display = 'inline-block';
+            } else {
+            removeButton.style.display = 'none';
+            }
+        });
+
+        // Remove the selected file when "Remove" button is clicked
+        removeButton.addEventListener('click', function() {
+            fileInput.value = ''; // Clear the file input
+            removeButton.style.display = 'none'; // Hide the remove button
+        });
           const REGISTER_API_URL = 'https://miphi-application.vercel.app/product_registration';
           let productCounter = 1; // Used for unique IDs in manual entry
           let isCsvMode = false;
@@ -602,8 +640,7 @@
               );
               allInteractiveInputs.forEach(input => {
                   if (input.id === 'invoice_receipt') {
-                      // For 'invoice_receipt', DO NOT attach 'input' or 'blur' listeners
-                      // for immediate validation feedback. It will be validated only on form submission.
+                    
                   } else {
                       // For all other fields, add listeners for validation on interaction.
                       input.addEventListener('input', function() { validateInput(this); });
@@ -736,20 +773,14 @@
                   overallFormIsValid = false;
               }
       
-            //   if (!overallFormIsValid) {
-            //       console.log('Form validation failed.');
-            //       const firstInvalid = form.querySelector('.is-invalid, :invalid');
-            //       if (firstInvalid) {
-            //           console.log('Invalid field:', firstInvalid.name || firstInvalid.id || firstInvalid);
-            //           firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            //           if (firstInvalid.focus && typeof firstInvalid.focus === 'function') firstInvalid.focus();
-            //       }
-            //       else if (!recaptchaResponseVal && recaptchaContainer) {
-            //           recaptchaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            //       }
-            //       Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'error');
-            //       return;
-            //   }
+              if (!overallFormIsValid) {
+                  console.log('Form validation failed.');
+                  if (!recaptchaResponseVal && recaptchaContainer) {
+                      recaptchaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                //   Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'error');
+                  return;
+              }
       
               const originalBtnText = submitBtn.innerHTML;
               submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
