@@ -256,13 +256,26 @@
     
                 <div class="col-md-6 mb-3">
                     <label for="mobile_number" class="form-label">Mobile Number</label>
-                    <input type="tel" id="mobile_number" name="mobile_number"
-                        class="form-control rounded-3 p-3"
-                        placeholder="Enter 10-digit mobile number"
-                        pattern="[0-9]{10}"
-                        required>
-                    <div class="invalid-feedback">A valid 10-digit mobile number is required.</div>
+                    <div class="input-group">
+                        <input type="text"
+                            name="country_code"
+                            id="country_code"
+                            class="form-control rounded-start"
+                            placeholder="+91"
+                            style="max-width: 80px;"
+                            pattern="^\+\d{1,4}$"
+                            required>
+                        <input type="tel"
+                            id="mobile_number"
+                            name="mobile_number"
+                            class="form-control rounded-end p-3"
+                            placeholder="Enter 10-digit mobile number"
+                            pattern="[0-9]{10}"
+                            required>
+                    </div>
+                    <div class="invalid-feedback">Enter a valid country code (e.g., +91) and 10-digit mobile number.</div>
                 </div>
+
                  <div class="col-md-6 mb-3"></div>
     
     
@@ -418,7 +431,7 @@
             fileInput.value = ''; // Clear the file input
             removeButton.style.display = 'none'; // Hide the remove button
         });
-          const REGISTER_API_URL = 'https://miphi-application.vercel.app/product_registration';
+          const REGISTER_API_URL = 'https://miphi-blog-backend.vercel.app/product_registration';
           let productCounter = 1; // Used for unique IDs in manual entry
           let isCsvMode = false;
           let csvProductData = [];
@@ -677,7 +690,7 @@
                   isValid = false;
               }
               
-              const alwaysRequiredOrCustomerField = input.id === 'name' || input.id === 'email' || input.id === 'mobile_number' || input.id === 'invoice_receipt';
+              const alwaysRequiredOrCustomerField = input.id === 'name' || input.id === 'email' || input.id === 'mobile_number' || input.id === 'country_code' || input.id === 'invoice_receipt';
               const isRelevantCsvField = isCsvMode && input.id ==='csv_file'; // csv_file doesn't have 'required' but handled in submit logic
       
               // Apply visual feedback based on relevance and validity
@@ -730,7 +743,7 @@
       
               let overallFormIsValid = true;
               // Validate customer info and invoice file (invoice_receipt will now show feedback)
-              ['name', 'email', 'mobile_number', 'invoice_receipt'].forEach(id => {
+              ['name', 'email', 'mobile_number','country_code', 'invoice_receipt'].forEach(id => {
                   const input = document.getElementById(id);
                   if (input && !validateInput(input)) { // validateInput will now apply classes to invoice_receipt
                       overallFormIsValid = false;
@@ -792,6 +805,7 @@
               formDataForApi.append('name', document.getElementById('name').value);
               formDataForApi.append('email', document.getElementById('email').value);
               formDataForApi.append('mobile_number', document.getElementById('mobile_number').value);
+              formDataForApi.append('country_code', document.getElementById('country_code').value);
               const invoiceFile = document.getElementById('invoice_receipt').files[0];
               if (invoiceFile) formDataForApi.append('invoice_receipt', invoiceFile);
               if (recaptchaResponseVal) formDataForApi.append('g-recaptcha-response', recaptchaResponseVal);
@@ -835,6 +849,7 @@
                           from_name: formDataForApi.get('name'),
                           from_email: formDataForApi.get('email'),
                           to_email: formDataForApi.get('email'),
+                          country_code: formDataForApi.get('country_code'),
                           mobile_number: formDataForApi.get('mobile_number'),
                           password: responseData.temp_password || 'N/A',
                           product_details: productDetailsForEmail.trim() || 'No product details provided.'

@@ -573,7 +573,7 @@
           data.recaptcha = recaptchaToken;
     
           try {
-            const res = await fetch(`https://miphi-application.vercel.app/customers`, {
+            const res = await fetch(`https://miphi-blog-backend.vercel.app/customers`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data)
