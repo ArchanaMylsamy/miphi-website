@@ -1042,8 +1042,8 @@
 
                 if (!overallFormIsValid) {
                   console.log('Form validation failed.');
-                  if (!recaptchaResponseVal && recaptchaContainer) {
-                    recaptchaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  if (!recaptchaResponseVal && recaptchaContainerProd) {
+                    recaptchaContainerProd.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
                   //   Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'error');
                   return;
@@ -1126,8 +1126,8 @@
                     }
                     form.classList.remove('was-validated');
                     form.querySelectorAll('.is-valid, .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
-                    if (recaptchaContainer) {
-                      recaptchaContainer.style.border = 'none';
+                    if (recaptchaContainerProd) {
+                      recaptchaContainerProd.style.border = 'none';
                       if (recaptchaError) recaptchaError.classList.add('d-none');
                     }
 
