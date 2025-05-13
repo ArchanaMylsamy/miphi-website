@@ -544,6 +544,12 @@
                               class="form-control rounded-3 p-3" placeholder="Serial Number" required>
                             <div class="invalid-feedback">Serial Number is required.</div>
                           </div>
+                          <div class="col-md-6">
+                            <label for="partNumber_1" class="form-label">Part Number</label>
+                            <input type="text" id="partNumber_1" name="part_number[]"
+                              class="form-control rounded-3 p-3" placeholder="Part Number" required>
+                            <div class="invalid-feedback">Part Number is required.</div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -553,7 +559,7 @@
                     <label for="csv_file" class="form-label">Upload CSV File</label>
                     <input type="file" id="csv_file" name="csv_file" class="form-control rounded-3 p-3" accept=".csv">
                     <small class="form-text text-muted">
-                      📌 CSV file must contain "Product Category" and "Serial Number" columns.
+                      📌 CSV file must contain "Product Category" and "Serial Number" and "Part Number" columns.
                     </small>
                     <div class="invalid-feedback">Please select a CSV file.</div>
                     <button type="button" class=" btn-secondary  px-3 mt-2" id="switchToManualBtn">
@@ -569,6 +575,7 @@
                           <th scope="col">#</th>
                           <th scope="col">Product Category</th>
                           <th scope="col">Serial Number</th>
+                          <th scope="col">Part Number</th>
                         </tr>
                       </thead>
                       <tbody id="product-table-body">
@@ -633,10 +640,10 @@
               }
 
               // Define the sample CSV data
-              const sampleCsvHeaders = "Product Category,Serial Number";
-              const sampleCsvRow1 = "aiDAPTIV+,466001";
-              const sampleCsvRow2 = "MiPhi_SSD_1TB,6534002";
-              const sampleCsvRow3 = "Industrial_eMMC_32GB,3667003";
+              const sampleCsvHeaders = "Product Category,Serial Number,Part Number";
+              const sampleCsvRow1 = "aiDAPTIV+,466001,345678";
+              const sampleCsvRow2 = "MiPhi_SSD_1TB,6534002,23456789";
+              const sampleCsvRow3 = "Industrial_eMMC_32GB,3667003,2345678";
 
               const sampleCsvContent = [
                 sampleCsvHeaders,
@@ -656,7 +663,8 @@
             <a href="${csvDataUri}" download="miphi_product_template.csv" style="color:#FF971D">Download Sample CSV Template</a>
             <br><strong>Required columns:</strong><br>
             - Product Category<br>
-            - Serial Number
+            - Serial Number<br>
+            - Part Number
             
         `;
               new bootstrap.Tooltip(tooltipEl, {
@@ -686,7 +694,7 @@
                 fileInput.value = ''; // Clear the file input
                 removeButton.style.display = 'none'; // Hide the remove button
               });
-              const REGISTER_API_URL = 'https://miphi-blog-backend.vercel.app/product_registration';
+              const REGISTER_API_URL = 'http://192.168.100.96:3002/product_registration';
               let productCounter = 1; // Used for unique IDs in manual entry
               let isCsvMode = false;
               let csvProductData = [];
@@ -778,6 +786,13 @@
                                  placeholder="Serial Number" required>
                           <div class="invalid-feedback">Serial Number is required.</div>
                       </div>
+                      <div class="col-md-6">
+                          <label for="partNumber_${productCounter}" class="form-label">Part Number</label>
+                          <input type="text" id="partNumber_${productCounter}" name="part_number[]"
+                                 class="form-control rounded-3 p-3"
+                                 placeholder="Part Number" required>
+                          <div class="invalid-feedback">Part Number is required.</div>
+                      </div>
                       <button type="button" class="btn btn-outline-danger btn-sm rounded-circle position-absolute top-0 end-0 mt-2 me-2 btn-remove-product" style="width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;" aria-label="Remove Product">
                           <i class="bi bi-x fs-5"></i>
                       </button>
@@ -822,9 +837,11 @@
                         const headerRow = rows[0].split(',').map(h => h.trim().toLowerCase());
                         const categoryIndex = headerRow.indexOf('product category');
                         const serialIndex = headerRow.indexOf('serial number');
+                        const partIndex = headerRow.indexOf('part number');
 
-                        if (categoryIndex === -1 || serialIndex === -1) {
-                          Swal.fire('Error', 'CSV file must contain "Product Category" and "Serial Number" columns.', 'error');
+                        if (categoryIndex === -1 || serialIndex === -1 || partIndex === -1) {
+                          Swal.fire('Error', 'CSV file must contain "Product Category", "Serial Number", and "Part Number" columns.', 'error');
+                          // Swal.fire('Error', 'CSV file must contain "Product Category" and "Serial Number" columns.', 'error');
                           productVerificationTableContainer.style.display = 'none';
                           if (csvFileInput) csvFileInput.value = '';
                           return;
@@ -834,10 +851,13 @@
                           const cols = rows[i].split(',').map(col => col.trim());
                           const category = cols[categoryIndex] || '';
                           const serial = cols[serialIndex] || '';
-                          if (category && serial) {
-                            csvProductData.push({ product_name: category, serial_number: serial });
+                          const part = cols[partIndex] || '';
+                          if (category && serial && part) {
+                            csvProductData.push({ product_name: category, serial_number: serial , part_number: part });
+
                           }
                         }
+                        console.log('Parsed CSV Data:', csvProductData); 
                         if (csvProductData.length > 0) {
                           productVerificationTableContainer.style.display = 'block';
                           csvCurrentPage = 1;
@@ -870,6 +890,7 @@
                   row.insertCell().textContent = start + index + 1;
                   row.insertCell().textContent = product.product_name;
                   row.insertCell().textContent = product.serial_number;
+                  row.insertCell().textContent = product.part_number;
                 });
               }
 
@@ -983,8 +1004,10 @@
                 productEntries.forEach(entry => {
                   const productNameSelect = entry.querySelector('select[name="product_name[]"]');
                   const serialNumberInput = entry.querySelector('input[name="serial_number[]"]');
+                  const partNumberInput = entry.querySelector('input[name="part_number[]"]');
                   if (!validateInput(productNameSelect)) allManualProductsValid = false;
                   if (!validateInput(serialNumberInput)) allManualProductsValid = false;
+                  if (!validateInput(partNumberInput)) allManualProductsValid = false;
                 });
                 return allManualProductsValid;
               }
@@ -992,6 +1015,7 @@
               form.addEventListener('submit', async function (event) {
                 event.preventDefault();
                 event.stopPropagation();
+                console.log('Submit button clicked. isCsvMode:', isCsvMode, 'CSV Data Length:', csvProductData.length); // Add this
                 form.classList.remove('was-validated'); // Reset before re-validating
 
                 let overallFormIsValid = true;
@@ -1000,14 +1024,21 @@
                   const input = document.getElementById(id);
                   if (input && !validateInput(input)) { // validateInput will now apply classes to invoice_receipt
                     overallFormIsValid = false;
+                    if(!overallFormIsValid){
+                      console.log("Overall form is not valid 'name', 'email', 'mobile_number', 'country_code', 'invoice_receipt'");
+                    }
                   }
                 });
 
                 if (isCsvMode) {
+                  console.log('CSV Mode: Validating CSV data' , csvProductData.length );
                   if (csvProductData.length === 0) {
                     Swal.fire('Validation Error', 'No products loaded from CSV. Please upload a CSV with product data or switch to manual entry.', 'error');
                     if (csvFileInput) csvFileInput.classList.add('is-invalid');
                     overallFormIsValid = false;
+                    if(!overallFormIsValid){
+                      console.log("Overall form is not valid 'csvProductData.length === 0'");
+                    }
                   } else {
                     if (csvFileInput) {
                       csvFileInput.classList.remove('is-invalid'); // If data is loaded, it's not "invalid" for being empty
@@ -1019,8 +1050,14 @@
                   if (manualEntries.length === 0) {
                     Swal.fire('Validation Error', 'Please add at least one product manually or use CSV upload.', 'error');
                     overallFormIsValid = false;
+                    if(!overallFormIsValid){
+                      console.log("Overall form is not valid 'manualEntries.length === 0'");
+                    }
                   } else if (!validateManualProductEntries()) {
                     overallFormIsValid = false;
+                    if(!overallFormIsValid){
+                      console.log("Overall form is not valid 'validateManualProductEntries()'");
+                    }
                   }
                 }
 
@@ -1033,6 +1070,9 @@
 
                 if (!recaptchaResponseVal && recaptchaContainerProd) {
                   overallFormIsValid = false;
+                  if(!overallFormIsValid){
+                    console.log("Overall form is not valid 'recaptchaResponseVal'");
+                  }
                   recaptchaContainerProd.style.border = '1px solid #dc3545';
                   recaptchaContainerProd.style.borderRadius = '0.25rem';
                   if (recaptchaErrorProdSibling) recaptchaErrorProdSibling.classList.remove('d-none');
@@ -1042,15 +1082,18 @@
                 }
 
                 form.classList.add('was-validated');
-                if (!form.checkValidity()) {
-                  overallFormIsValid = false;
-                }
+                // if (!form.checkValidity()) {
+                //   overallFormIsValid = false;
+                //   if(!overallFormIsValid){
+                //     console.log("Overall form is not valid 'form.checkValidity()'");
+                //   }
+                // }
 
                 if (!overallFormIsValid) {
                   if (!recaptchaResponseVal && recaptchaContainerProd) {
                     recaptchaContainerProd.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
-                  //   Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'error');
+                    Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'error');
                   return;
                 }
 
@@ -1070,28 +1113,36 @@
                 if (recaptchaResponseVal) formDataForApi.append('g-recaptcha-response', recaptchaResponseVal);
 
                 let productDetailsForEmail = "";
+                console.log("Before switching")
                 if (isCsvMode) {
                   csvProductData.forEach((product, index) => {
                     formDataForApi.append('product_name[]', product.product_name);
                     formDataForApi.append('serial_number[]', product.serial_number);
-                    productDetailsForEmail += `Product ${index + 1}:\n  Category: ${product.product_name}\n  Serial: ${product.serial_number}\n\n`;
+                    formDataForApi.append('part_number[]', product.part_number);
+                    productDetailsForEmail += `Product ${index + 1}:\n  Category: ${product.product_name}\n  Serial: ${product.serial_number}\n Part: ${product.part_number}\n\n`;
                   });
                 } else {
                   productEntriesContainer.querySelectorAll('.product-entry').forEach((entry, index) => {
                     const productNameInput = entry.querySelector('select[name="product_name[]"]');
                     const serialNumberInput = entry.querySelector('input[name="serial_number[]"]');
-                    if (productNameInput && serialNumberInput && productNameInput.value && serialNumberInput.value) { // Ensure values exist
+                    const partNumberInput = entry.querySelector('input[name="part_number[]"]');
+                    if (productNameInput && serialNumberInput && partNumberInput && partNumberInput.value && productNameInput.value && serialNumberInput.value) { // Ensure values exist
                       formDataForApi.append('product_name[]', productNameInput.value);
                       formDataForApi.append('serial_number[]', serialNumberInput.value);
-                      productDetailsForEmail += `Product ${index + 1}:\n  Category: ${productNameInput.value}\n  Serial: ${serialNumberInput.value}\n\n`;
+                      formDataForApi.append('part_number[]', partNumberInput.value);
+                      productDetailsForEmail += `Product ${index + 1}:\n  Category: ${productNameInput.value}\n  Serial: ${serialNumberInput.value}\n  Part: ${partNumberInput.value}\n\n`;
                     }
                   });
                 }
 
+                  console.log("after switching")
+
                 try {
+                  console.log("isidetry  going tpo send api request")
                   const response = await fetch(REGISTER_API_URL, { method: 'POST', body: formDataForApi });
                   let responseData = { success: false, message: `Server responded with status: ${response.status}` };
                   try {
+                     console.log("isidetry processing  api request")
                     responseData = await response.json();
                   } catch (jsonError) {
                     console.error("Failed to parse API response as JSON:", jsonError);
@@ -1705,7 +1756,7 @@
                 data['g-recaptcha-response'] = recaptchaTokenCust;
 
                 try {
-                  const res = await fetch(`https://miphi-blog-backend.vercel.app/customers`, {
+                  const res = await fetch(`http://192.168.100.96:3002/customers`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
