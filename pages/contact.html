@@ -1128,7 +1128,7 @@
                     form.querySelectorAll('.is-valid, .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
                     if (recaptchaContainerProd) {
                       recaptchaContainerProd.style.border = 'none';
-                      if (recaptchaError) recaptchaError.classList.add('d-none');
+                      if (recaptchaErrorProdSibling) recaptchaErrorProdSibling.classList.add('d-none');
                     }
 
                     productEntriesContainer.querySelectorAll('.product-entry:not(:first-child)').forEach(e => e.remove());
