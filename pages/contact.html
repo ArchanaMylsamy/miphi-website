@@ -42,7 +42,7 @@
   <script type="text/javascript">
     (function () {
       emailjs.init({
-        publicKey: "1U3Z0zkZ8AUjqnnVp",
+        publicKey: "HB4xmNAtq8HrlOu2_",
       });
     })();
   </script>
@@ -1041,7 +1041,6 @@
                 }
 
                 if (!overallFormIsValid) {
-                  console.log('Form validation failed.');
                   if (!recaptchaResponseVal && recaptchaContainerProd) {
                     recaptchaContainerProd.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
@@ -1066,7 +1065,6 @@
 
                 let productDetailsForEmail = "";
                 if (isCsvMode) {
-                  console.log('CSV Mode: ', isCsvMode, csvProductData);
                   csvProductData.forEach((product, index) => {
                     formDataForApi.append('product_name[]', product.product_name);
                     formDataForApi.append('serial_number[]', product.serial_number);
@@ -1109,7 +1107,7 @@
                       product_details: productDetailsForEmail.trim() || 'No product details provided.'
                     };
 
-                    emailjs.send('service_viib887', 'template_3hphd4a', templateParams)
+                    emailjs.send('service_n4ihm3q', 'template_ei7xjpx', templateParams)
                       .then(r => console.log('EmailJS SUCCESS (Customer)!', r.status, r.text),
                         e => console.error('EmailJS FAILED (Customer)...', e));
                     // emailjs.send('service_8dvnlfs', 'template_9wu4uds', templateParams) 
@@ -1323,10 +1321,9 @@
                           message: message.value
                         };
 
-                        emailjs.send('service_viib887', 'template_n9zdhzc', templateParamsSales)
+                        emailjs.send('service_n4ihm3q', 'template_or5trhh', templateParamsSales)
                           .then(
                             function (response) {
-                              console.log('SUCCESS!', response.status, response.text);
                               alert('Message sent successfully!');
                               form.reset();
                               form.classList.remove('was-validated');
