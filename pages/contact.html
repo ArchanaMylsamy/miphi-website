@@ -694,7 +694,7 @@
                 fileInput.value = ''; // Clear the file input
                 removeButton.style.display = 'none'; // Hide the remove button
               });
-              const REGISTER_API_URL = 'http://192.168.100.96:3002/product_registration';
+              const REGISTER_API_URL = 'https://miphi-blog-backend.vercel.app/product_registration';
               let productCounter = 1; // Used for unique IDs in manual entry
               let isCsvMode = false;
               let csvProductData = [];
@@ -1756,7 +1756,7 @@
                 data['g-recaptcha-response'] = recaptchaTokenCust;
 
                 try {
-                  const res = await fetch(`http://192.168.100.96:3002/customers`, {
+                  const res = await fetch(`https://miphi-blog-backend.vercel.app/customers`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
